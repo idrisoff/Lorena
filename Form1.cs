@@ -11,9 +11,15 @@ namespace SalonLorena
         {
             InitializeComponent();
             button3.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "A"); };
-            button4.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "E"); };
             button5.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "D"); };
         }
+       
+        void MyFormLoad(object sender, EventArgs e)
+        {
+            CreateDB();
+            ShowData();
+        }
+
         void CreateDB()
         {
             using (var con = new SqliteConnection(@"Data Source=" + path))
@@ -21,9 +27,9 @@ namespace SalonLorena
                 con.Open();
                 string sql1 = "create table if not exists shops(" +
                     "id integer not null primary key autoincrement unique, " +
-                    "name varchar(20) not null unique, " +
+                    "nameSalon text not null unique, " +
                     "discount real default 0, " +
-                    "description varchar(124) default '', " +
+                    "description text default '', " +
                     "depend integer default 0, " +
                     "parentId integer)";
                 SqliteCommand command = new SqliteCommand(sql1, con);
@@ -33,7 +39,7 @@ namespace SalonLorena
                 var reader = cmd.ExecuteReader();
                 if (!reader.HasRows)
                 {
-                    string sql2 = @"insert into shops(name, discount, description, depend, parentId) values "
+                    string sql2 = @"insert into shops(nameSalon, discount, description, depend, parentId) values "
                     + "('Миасс', 4, '', 0, 0), "
                     + "('Амелия', 5, '', 1, 1), "
                     + "('Тест1', 2, '', 1, 2), "
@@ -44,28 +50,7 @@ namespace SalonLorena
                 }
             }
         }
-        void MyFormLoad(object sender, EventArgs e)
-        {
-            CreateDB();
-            ShowData();
-        }
-        void CreateNode(TreeView view, string text, string type)
-        {
-            TreeNode node = new TreeNode(text);
-            if (type == "A")
-            {
-                try
-                {
-                    view.SelectedNode.Nodes.Add(node);
-                }
-                catch (Exception)
-                { view.Nodes.Add(node); }
-            }
-            else if (type == "E")
-                view.SelectedNode.Text = text;
-            else
-                view.SelectedNode.Remove();
-        }
+
         void ShowData()
         {
             treeView1.Nodes.Clear();
@@ -114,6 +99,68 @@ namespace SalonLorena
                     FindByTag(Nodes[i].Nodes, node, tagValue);
                 }
             }
+        }
+        void CreateNode(TreeView view, string text, string type)
+        {
+            TreeNode node = new TreeNode(text);
+            if (type == "A")
+            {
+                try
+                {
+                    using (var con = new SqliteConnection(@"Data Source=" + path))
+                    {
+                        con.Open();
+                        var x = view.SelectedNode.Text;
+                        string sqlParent = $"select * from shops where nameSalon='{x}'";
+                        var cmdParent = new SqliteCommand(sqlParent, con);
+                        var readerParent = cmdParent.ExecuteReader();
+                        string stm = "";
+                        if (readerParent.HasRows)
+                        {
+                            readerParent.Read();
+                            stm = $"insert into shops(nameSalon, discount, description, depend, parentId) values ('{textBox3.Text}', {Convert.ToDouble(textBox4.Text)}, '', 1, " +
+                                $"{Convert.ToInt32(readerParent.GetString(0))})";
+                        }
+                        else
+                            stm = $"insert into shops(nameSalon, discount, description, depend, parentId) values ('{textBox3.Text}', {Convert.ToDouble(textBox4.Text)}, '', 0, 0)";
+
+                        var cmd = new SqliteCommand(stm, con);
+                        cmd.ExecuteNonQuery();
+                    }
+                    view.SelectedNode.Nodes.Add(node);
+                }
+                catch (Exception)
+                { MessageBox.Show("Error"); }
+            }
+            else
+            {
+                try
+                {
+                    using (var con = new SqliteConnection(@"Data Source=" + path))
+                    {
+                        con.Open();
+                        var x = view.SelectedNode.Text;
+                        string sql = $"select * from shops where nameSalon='{x}'";
+                        var cmd = new SqliteCommand(sql, con);
+                        var reader = cmd.ExecuteReader();
+                        string stm = "";
+                        if (reader.HasRows)
+                        {
+                            reader.Read();
+                            stm = $"delete from shops where id = {Convert.ToInt32(reader.GetString(0))}";
+                        }
+                        var cmdElse = new SqliteCommand(stm, con);
+                        cmdElse.ExecuteNonQuery();
+                    }
+                    view.SelectedNode.Remove();
+                }
+                catch (Exception)
+                { MessageBox.Show("Error"); }
+            }
+        }
+        void Calculate()
+        {
+
         }
     }
 }
