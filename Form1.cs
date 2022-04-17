@@ -12,8 +12,9 @@ namespace SalonLorena
             InitializeComponent();
             button3.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "A"); };
             button5.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "D"); };
+            button1.Click += (o, e) => { Calculate(treeView1); };
         }
-       
+
         void MyFormLoad(object sender, EventArgs e)
         {
             CreateDB();
@@ -158,9 +159,53 @@ namespace SalonLorena
                 { MessageBox.Show("Error"); }
             }
         }
-        void Calculate()
+        void Calculate(TreeView view)
         {
-
+            try
+            {
+                using (var con = new SqliteConnection(@"Data Source=" + path))
+                {
+                    con.Open();
+                    var price = Double.Parse(textBox1.Text);
+                    var x = view.SelectedNode.Text;
+                    string sql = $"select * from shops where nameSalon='{x}'";
+                    var cmd = new SqliteCommand(sql, con);
+                    var reader = cmd.ExecuteReader();
+                    double discount = 0;
+                    int parentId = 0;
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        parentId = reader.GetInt32(5);
+                        if (parentId == 0)
+                            discount = reader.GetInt32(2);
+                        else
+                            discount = FindDiscountParent(parentId, reader.GetInt32(2));
+                    }
+                    textBox2.Text = (price - (price * (discount / 100))).ToString();
+                }
+            }
+            catch (Exception)
+            { MessageBox.Show("Error"); }
+        }
+        double FindDiscountParent(int id, double s)
+        {
+            using (var con = new SqliteConnection(@"Data Source=" + path))
+            {
+                con.Open();
+                string sql = $"select * from shops where id={id}";
+                var cmd = new SqliteCommand(sql, con);
+                var reader = cmd.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    s += reader.GetDouble(2);
+                    if (reader.GetInt32(4) == 0)
+                        return s;
+                    return FindDiscountParent(reader.GetInt32(5), s);
+                }
+                else return 0;
+            }
         }
     }
 }
