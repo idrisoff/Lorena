@@ -6,6 +6,7 @@ namespace SalonLorena
     public partial class Form1 : Form
     {
         string path = "data.db";
+        //string pathRes = "dataRes.db";
 
         public Form1()
         {
@@ -13,6 +14,7 @@ namespace SalonLorena
             button3.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "A"); };
             button5.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "D"); };
             button1.Click += (o, e) => { Calculate(treeView1); };
+            button2.Click += (o, e) => { SaveResult(dataGridView1, treeView1); };
         }
 
         void MyFormLoad(object sender, EventArgs e)
@@ -206,6 +208,36 @@ namespace SalonLorena
                 }
                 else return 0;
             }
+        }
+        void SaveResult(DataGridView dgv, TreeView view)
+        {
+            try
+            {
+                using (var con = new SqliteConnection(@"Data Source=" + path))
+                {
+                    con.Open();
+                    var price = Double.Parse(textBox1.Text);
+                    var res = Double.Parse(textBox2.Text);
+                    var x = view.SelectedNode.Text;
+                    string sql = $"select * from shops where nameSalon='{x}'";
+                    var cmd = new SqliteCommand(sql, con);
+                    var reader = cmd.ExecuteReader();
+                    double discount = 0;
+                    int parentId = 0;
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        parentId = reader.GetInt32(5);
+                        if (parentId == 0)
+                            discount = reader.GetInt32(2);
+                        else
+                            discount = FindDiscountParent(parentId, reader.GetInt32(2));
+                    }
+                    dgv.Rows.Add(x, price, discount, res);
+                }
+            }
+            catch (Exception)
+            { MessageBox.Show("Error"); }
         }
     }
 }

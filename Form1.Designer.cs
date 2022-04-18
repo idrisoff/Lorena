@@ -39,10 +39,6 @@
             this.button5 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Price = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Discount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.button2 = new System.Windows.Forms.Button();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
@@ -57,6 +53,10 @@
             this.cmsChildAdd = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsModify = new System.Windows.Forms.ToolStripMenuItem();
             this.cmsDelete = new System.Windows.Forms.ToolStripMenuItem();
+            this.Choose = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Price = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Discount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Result = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -149,7 +149,7 @@
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column1,
+            this.Choose,
             this.Price,
             this.Discount,
             this.Result});
@@ -159,30 +159,6 @@
             this.dataGridView1.RowTemplate.Height = 23;
             this.dataGridView1.Size = new System.Drawing.Size(413, 248);
             this.dataGridView1.TabIndex = 5;
-            // 
-            // Column1
-            // 
-            this.Column1.HeaderText = "Выбор";
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            // 
-            // Price
-            // 
-            this.Price.HeaderText = "Цена";
-            this.Price.Name = "Price";
-            this.Price.ReadOnly = true;
-            // 
-            // Discount
-            // 
-            this.Discount.HeaderText = "Скидка";
-            this.Discount.Name = "Discount";
-            this.Discount.ReadOnly = true;
-            // 
-            // Result
-            // 
-            this.Result.HeaderText = "Результат";
-            this.Result.Name = "Result";
-            this.Result.ReadOnly = true;
             // 
             // button2
             // 
@@ -292,6 +268,30 @@
             this.cmsDelete.Size = new System.Drawing.Size(106, 22);
             this.cmsDelete.Text = "Delete";
             // 
+            // Choose
+            // 
+            this.Choose.HeaderText = "Выбор";
+            this.Choose.Name = "Choose";
+            this.Choose.ReadOnly = true;
+            // 
+            // Price
+            // 
+            this.Price.HeaderText = "Цена";
+            this.Price.Name = "Price";
+            this.Price.ReadOnly = true;
+            // 
+            // Discount
+            // 
+            this.Discount.HeaderText = "Скидка";
+            this.Discount.Name = "Discount";
+            this.Discount.ReadOnly = true;
+            // 
+            // Result
+            // 
+            this.Result.HeaderText = "Результат";
+            this.Result.Name = "Result";
+            this.Result.ReadOnly = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -324,10 +324,6 @@
         private Label label2;
         private Label label1;
         private DataGridView dataGridView1;
-        private DataGridViewTextBoxColumn Column1;
-        private DataGridViewTextBoxColumn Price;
-        private DataGridViewTextBoxColumn Discount;
-        private DataGridViewTextBoxColumn Result;
         private ContextMenuStrip cmsRoot;
         private ToolStripMenuItem cmsRootAdd;
         private ContextMenuStrip cmsChild;
@@ -340,5 +336,9 @@
         private TextBox textBox4;
         private Label label4;
         private Label label3;
+        private DataGridViewTextBoxColumn Choose;
+        private DataGridViewTextBoxColumn Price;
+        private DataGridViewTextBoxColumn Discount;
+        private DataGridViewTextBoxColumn Result;
     }
 }
