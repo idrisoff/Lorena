@@ -11,10 +11,10 @@ namespace SalonLorena
         public Form1()
         {
             InitializeComponent();
-            button3.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "A"); };
-            button5.Click += (o, e) => { CreateNode(treeView1, textBox3.Text, "D"); };
-            button1.Click += (o, e) => { Calculate(treeView1); };
-            button2.Click += (o, e) => { SaveResult(dataGridView1, treeView1); };
+            button3.Click += (o, e) => { CreateNode(textBox3.Text, "A"); };
+            button5.Click += (o, e) => { CreateNode(textBox3.Text, "D"); };
+            button1.Click += (o, e) => { Calculate(); };
+            button2.Click += (o, e) => { SaveResult(); };
         }
 
         void MyFormLoad(object sender, EventArgs e)
@@ -104,7 +104,7 @@ namespace SalonLorena
                 }
             }
         }
-        void CreateNode(TreeView view, string text, string type)
+        void CreateNode(string text, string type)
         {
             TreeNode node = new TreeNode(text);
             if (type == "A")
@@ -114,7 +114,7 @@ namespace SalonLorena
                     using (var con = new SqliteConnection(@"Data Source=" + path))
                     {
                         con.Open();
-                        var x = view.SelectedNode.Text;
+                        var x = treeView1.SelectedNode.Text;
                         string sqlParent = $"select * from shops where nameSalon='{x}'";
                         var cmdParent = new SqliteCommand(sqlParent, con);
                         var readerParent = cmdParent.ExecuteReader();
@@ -131,7 +131,7 @@ namespace SalonLorena
                         var cmd = new SqliteCommand(stm, con);
                         cmd.ExecuteNonQuery();
                     }
-                    view.SelectedNode.Nodes.Add(node);
+                    treeView1.SelectedNode.Nodes.Add(node);
                 }
                 catch (Exception)
                 { MessageBox.Show("Error"); }
@@ -143,7 +143,7 @@ namespace SalonLorena
                     using (var con = new SqliteConnection(@"Data Source=" + path))
                     {
                         con.Open();
-                        var x = view.SelectedNode.Text;
+                        var x = treeView1.SelectedNode.Text;
                         string sql = $"select * from shops where nameSalon='{x}'";
                         var cmd = new SqliteCommand(sql, con);
                         var reader = cmd.ExecuteReader();
@@ -156,13 +156,13 @@ namespace SalonLorena
                         var cmdElse = new SqliteCommand(stm, con);
                         cmdElse.ExecuteNonQuery();
                     }
-                    view.SelectedNode.Remove();
+                    treeView1.SelectedNode.Remove();
                 }
                 catch (Exception)
                 { MessageBox.Show("Error"); }
             }
         }
-        void Calculate(TreeView view)
+        void Calculate()
         {
             try
             {
@@ -170,7 +170,7 @@ namespace SalonLorena
                 {
                     con.Open();
                     var price = Double.Parse(textBox1.Text);
-                    var x = view.SelectedNode.Text;
+                    var x = treeView1.SelectedNode.Text;
                     string sql = $"select * from shops where nameSalon='{x}'";
                     var cmd = new SqliteCommand(sql, con);
                     var reader = cmd.ExecuteReader();
@@ -210,7 +210,7 @@ namespace SalonLorena
                 else return 0;
             }
         }
-        void SaveResult(DataGridView dgv, TreeView view)
+        void SaveResult()
         {
             try
             {
@@ -219,9 +219,9 @@ namespace SalonLorena
                     con.Open();
                     var price = Double.Parse(textBox1.Text);
                     var res = Double.Parse(textBox2.Text);
-                    var x = view.SelectedNode.Text;
+                    var x = treeView1.SelectedNode.Text;
                     double discount = GetDiscount(x);
-                    dgv.Rows.Add(x, price, discount, res);
+                    dataGridView1.Rows.Add(x, price, discount, res);
                     string stm = $"insert into res(nameSalon, price, discount, res) " +
                         $"values ('{x}', " +
                         $"'{price}', '{discount}', '{res}')";
