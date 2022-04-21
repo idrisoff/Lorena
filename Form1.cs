@@ -6,7 +6,7 @@ namespace SalonLorena
     public partial class Form1 : Form
     {
         string path = "data.db";
-        //string pathRes = "dataRes.db";
+        string pathRes = "dataRes.db";
 
         public Form1()
         {
@@ -21,6 +21,7 @@ namespace SalonLorena
         {
             CreateDB();
             ShowData();
+            CreateOrReadDBResult(dataGridView1);
         }
 
         void CreateDB()
@@ -213,31 +214,71 @@ namespace SalonLorena
         {
             try
             {
-                using (var con = new SqliteConnection(@"Data Source=" + path))
+                using (var con = new SqliteConnection(@"Data Source=" + pathRes))
                 {
                     con.Open();
                     var price = Double.Parse(textBox1.Text);
                     var res = Double.Parse(textBox2.Text);
                     var x = view.SelectedNode.Text;
-                    string sql = $"select * from shops where nameSalon='{x}'";
-                    var cmd = new SqliteCommand(sql, con);
-                    var reader = cmd.ExecuteReader();
-                    double discount = 0;
-                    int parentId = 0;
-                    if (reader.HasRows)
-                    {
-                        reader.Read();
-                        parentId = reader.GetInt32(5);
-                        if (parentId == 0)
-                            discount = reader.GetInt32(2);
-                        else
-                            discount = FindDiscountParent(parentId, reader.GetInt32(2));
-                    }
+                    double discount = GetDiscount(x);
                     dgv.Rows.Add(x, price, discount, res);
+                    string stm = $"insert into res(nameSalon, price, discount, res) " +
+                        $"values ('{x}', " +
+                        $"'{price}', '{discount}', '{res}')";
+                    var cmd = new SqliteCommand(stm, con);
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (Exception)
             { MessageBox.Show("Error"); }
+        }
+        void CreateOrReadDBResult(DataGridView dgv)
+        {
+            using (var con = new SqliteConnection(@"Data Source=" + pathRes))
+            {
+                con.Open();
+                string sql1 = "create table if not exists res(" +
+                    "id integer not null primary key autoincrement unique, " +
+                    "nameSalon text not null, " +
+                    "price real default 0, " +
+                    "discount real default 0, " +
+                    "res real)";
+                SqliteCommand command = new SqliteCommand(sql1, con);
+                command.ExecuteNonQuery();
+                string stm = "SELECT * FROM res";
+                var cmd = new SqliteCommand(stm, con);
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    if (reader.HasRows)
+                    {
+                        dgv.Rows.Add(reader.GetString(1), reader.GetString(2), GetDiscount(reader.GetString(1)), reader.GetString(4));
+                    }
+                }
+            }
+        }
+        double GetDiscount(string nameSalon)
+        {
+            double discount = 0;
+            using (var con = new SqliteConnection(@"Data Source=" + path))
+            {
+                con.Open();
+                string sql = $"select * from shops where nameSalon='{nameSalon}'";
+                var cmd = new SqliteCommand(sql, con);
+                var reader = cmd.ExecuteReader();
+                int parentId = 0;
+                if (reader.HasRows)
+                {
+                    reader.Read();
+                    parentId = reader.GetInt32(5);
+                    if (parentId == 0)
+                        discount = reader.GetInt32(2);
+                    else
+                        discount = FindDiscountParent(parentId, reader.GetInt32(2));
+                }
+            }
+            return discount;
         }
     }
 }
